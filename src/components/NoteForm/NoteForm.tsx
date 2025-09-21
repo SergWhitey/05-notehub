@@ -1,8 +1,11 @@
 import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import css from './NoteForm.module.css';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createNote } from '../../services/noteService';
 import type { NoteTag } from '../../types/note';
+import css from './NoteForm.module.css';
+import type { CreateNoteParams } from '../../services/noteService';
 
 interface NoteFormValues {
   title: string;
@@ -11,8 +14,8 @@ interface NoteFormValues {
 }
 
 interface NoteFormProps {
-  onSubmit: (values: NoteFormValues) => void;
   onCancel: () => void;
+  onSubmit: (values: CreateNoteParams) => void;
   isPending: boolean;
 }
 
@@ -27,7 +30,21 @@ const validationSchema = Yup.object({
     .required('Tag is required'),
 });
 
-const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, isPending }) => {
+const NoteForm: React.FC<NoteFormProps> = ({ onCancel, onSubmit, isPending }) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      formik.resetForm();
+      onCancel();
+    },
+    onError: (error) => {
+      console.error('Error creating note:', error);
+    },
+  });
+
   const formik = useFormik<NoteFormValues>({
     initialValues: {
       title: '',
@@ -36,6 +53,7 @@ const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, isPending }) =>
     },
     validationSchema,
     onSubmit: (values) => {
+      mutation.mutate(values);
       onSubmit(values);
     },
   });
@@ -56,9 +74,7 @@ const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, isPending }) =>
           aria-describedby="title-error"
         />
         {formik.touched.title && formik.errors.title && (
-          <span id="title-error" className={css.error}>
-            {formik.errors.title}
-          </span>
+          <span id="title-error" className={css.error}>{formik.errors.title}</span>
         )}
       </div>
 
@@ -76,9 +92,7 @@ const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, isPending }) =>
           aria-describedby="content-error"
         />
         {formik.touched.content && formik.errors.content && (
-          <span id="content-error" className={css.error}>
-            {formik.errors.content}
-          </span>
+          <span id="content-error" className={css.error}>{formik.errors.content}</span>
         )}
       </div>
 
@@ -101,18 +115,25 @@ const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, isPending }) =>
           <option value="Shopping">Shopping</option>
         </select>
         {formik.touched.tag && formik.errors.tag && (
-          <span id="tag-error" className={css.error}>
-            {formik.errors.tag}
-          </span>
+          <span id="tag-error" className={css.error}>{formik.errors.tag}</span>
         )}
       </div>
 
       <div className={css.actions}>
-        <button type="button" className={css.cancelButton} onClick={onCancel} disabled={isPending}>
+        <button
+          type="button"
+          className={css.cancelButton}
+          onClick={onCancel}
+          disabled={mutation.isPending}
+        >
           Cancel
         </button>
-        <button type="submit" className={css.submitButton} disabled={isPending || !formik.isValid}>
-          {isPending ? 'Creating...' : 'Create note'}
+        <button
+          type="submit"
+          className={css.submitButton}
+          disabled={mutation.isPending || !formik.isValid}
+        >
+          {mutation.isPending ? 'Creating...' : 'Create note'}
         </button>
       </div>
     </form>

@@ -30,7 +30,7 @@ const validationSchema = Yup.object({
     .required('Tag is required'),
 });
 
-const NoteForm: React.FC<NoteFormProps> = ({ onCancel, onSubmit, isPending }) => {
+const NoteForm: React.FC<NoteFormProps> = ({ onCancel, onSubmit }) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

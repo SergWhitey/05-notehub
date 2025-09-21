@@ -8,6 +8,9 @@ interface ModalProps {
 }
 
 const modalRoot = document.getElementById('modal-root')!; 
+if (!modalRoot) {
+  throw new Error('Modal root element not found');
+}
 
 const Modal: React.FC<ModalProps> = ({ children, onClose }) => {
   useEffect(() => {

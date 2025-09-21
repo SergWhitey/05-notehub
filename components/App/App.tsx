@@ -78,7 +78,7 @@ const createNoteMutation = useMutation({
               createNoteMutation.mutate(values);
             }}
             onCancel={() => setIsModalOpen(false)}
-            isLoading={createNoteMutation.isLoading}
+            isPending={createNoteMutation.isPending}
           />
         </Modal>
       )}

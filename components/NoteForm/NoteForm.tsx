@@ -13,7 +13,7 @@ interface NoteFormValues {
 interface NoteFormProps {
   onSubmit: (values: NoteFormValues) => void;
   onCancel: () => void;
-  isLoading: boolean;
+  isPending: boolean;
 }
 
 const validationSchema = Yup.object({
@@ -27,7 +27,7 @@ const validationSchema = Yup.object({
     .required('Tag is required'),
 });
 
-const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, isLoading }) => {
+const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, isPending }) => {
   const formik = useFormik<NoteFormValues>({
     initialValues: {
       title: '',
@@ -108,11 +108,11 @@ const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel, isLoading }) =>
       </div>
 
       <div className={css.actions}>
-        <button type="button" className={css.cancelButton} onClick={onCancel} disabled={isLoading}>
+        <button type="button" className={css.cancelButton} onClick={onCancel} disabled={isPending}>
           Cancel
         </button>
-        <button type="submit" className={css.submitButton} disabled={isLoading || !formik.isValid}>
-          {isLoading ? 'Creating...' : 'Create note'}
+        <button type="submit" className={css.submitButton} disabled={isPending || !formik.isValid}>
+          {isPending ? 'Creating...' : 'Create note'}
         </button>
       </div>
     </form>

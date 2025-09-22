@@ -6,7 +6,6 @@ import css from './NoteList.module.css';
 
 interface NoteListProps {
   notes: Note[];
-  onDelete: (id: string) => void;
 }
 
 const NoteList: React.FC<NoteListProps> = ({ notes }) => {
@@ -32,11 +31,15 @@ const NoteList: React.FC<NoteListProps> = ({ notes }) => {
           <div className={css.footer}>
             <span className={css.tag}>{tag}</span>
             <button
-              className={css.button}
-              onClick={() => mutate(id)}
-            >
-              Delete
-            </button>
+  className={css.button}
+  onClick={() => {
+    if (window.confirm('Are you sure you want to delete this note?')) {
+      mutate(id);
+    }
+  }}
+>
+  Delete
+</button>
           </div>
         </li>
       ))}
